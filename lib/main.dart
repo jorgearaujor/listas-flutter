@@ -79,8 +79,16 @@ class _CatalogoPageState extends State<CatalogoPage> {
     );
 
     // Inclui o novo produto na lista sem substituir os existentes.
-    if (novoProduto != null) {
+    if (novoProduto != null && mounted) {
       setState(() => _produtos.add(novoProduto));
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('"${novoProduto.nome}" cadastrado no catálogo!'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
     }
   }
 
@@ -92,6 +100,10 @@ class _CatalogoPageState extends State<CatalogoPage> {
         SnackBar(
           content: Text('${produto.nome} foi adicionado ao carrinho!'),
           duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'VER CARRINHO',
+            onPressed: _abrirCarrinho,
+          ),
         ),
       );
   }
@@ -122,10 +134,29 @@ class _CatalogoPageState extends State<CatalogoPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: _produtos.length,
-        itemBuilder: (context, index) {
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Row(
+              children: [
+                const Icon(Icons.inventory_2_outlined, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '${_produtos.length} produtos no catálogo',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: _produtos.length,
+              itemBuilder: (context, index) {
           final produto = _produtos[index];
           return Card(
             elevation: 2,
@@ -182,7 +213,10 @@ class _CatalogoPageState extends State<CatalogoPage> {
               ),
             ),
           );
-        },
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _abrirCadastro,
